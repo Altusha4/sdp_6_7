@@ -6,10 +6,13 @@
   <component name="ChangeListManager">
     <list default="true" id="b058a5fb-fadc-4b01-b081-2161a30ecd0e" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/static/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/css/styles.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/static/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/static/js/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/js/app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/main/resources/static/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/main/resources/static/css/styles.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/main/resources/static/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/main/resources/static/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/main/resources/static/js/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/main/resources/static/js/app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/static/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/static/css/styles.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/static/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/static/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/static/js/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/static/js/app.js" afterDir="false" />
     </list>
@@ -105,7 +108,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1761972874278</updated>
-      <workItem from="1761972875734" duration="15251000" />
+      <workItem from="1761972875734" duration="18986000" />
     </task>
     <servers />
   </component>

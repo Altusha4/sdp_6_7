@@ -45,6 +45,18 @@ class WeatherSimulator {
         document.getElementById('notification-type').addEventListener('change', () => this.updateBridgeConfig());
         document.getElementById('sender-type').addEventListener('change', () => this.updateBridgeConfig());
         document.getElementById('send-notifications').addEventListener('click', () => this.notifyObservers());
+
+        // Обработчики для кнопок городов
+        document.querySelectorAll('.city-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const city = e.target.dataset.city;
+                this.switchCity(city);
+
+                // Подсветка активной кнопки
+                document.querySelectorAll('.city-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+            });
+        });
     }
 
     async setRealTimeStrategy() {
@@ -151,10 +163,20 @@ class WeatherSimulator {
         document.querySelectorAll('.strategy-buttons .btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById(`${strategy}-btn`).classList.add('active');
         this.logEvent(`Strategy: ${strategy}`);
+
+        if (strategy === 'manual') {
+            this.showManualInput();
+        } else {
+            this.hideManualInput();
+        }
     }
 
     showManualInput() {
         document.getElementById('manual-input-section').style.display = 'block';
+    }
+
+    hideManualInput() {
+        document.getElementById('manual-input-section').style.display = 'none';
     }
 
     generateRealTimeData() {
@@ -237,7 +259,6 @@ class WeatherSimulator {
         this.logEvent(`📢 Sending notifications to ${this.observers.length} observers...`);
 
         this.observers.forEach(observer => {
-            // Добавляем проверки на undefined
             const notificationType = observer.notificationType || this.bridgeConfig.notificationType;
             const senderType = observer.senderType || this.bridgeConfig.senderType;
 
@@ -261,8 +282,6 @@ class WeatherSimulator {
     }
 
     addNotification(message, type, senderType, deviceName) {
-        console.log('🔔 ADDING NOTIFICATION:', { message, type, senderType, deviceName });
-
         const notification = {
             message: message,
             type: type || 'scheduled',
@@ -273,14 +292,11 @@ class WeatherSimulator {
 
         this.notifications.unshift(notification);
         if (this.notifications.length > 10) this.notifications.pop();
-
-        console.log('📋 NOTIFICATIONS ARRAY:', this.notifications);
         this.updateNotificationsDisplay();
     }
 
     updateNotificationsDisplay() {
         const container = document.getElementById('notifications');
-        console.log('🔄 UPDATING NOTIFICATIONS DISPLAY, container:', container);
 
         if (!container) {
             console.error('❌ NOTIFICATIONS CONTAINER NOT FOUND!');
@@ -293,14 +309,12 @@ class WeatherSimulator {
         }
 
         container.innerHTML = this.notifications.map(notif => `
-        <div class="notification-item ${notif.type === 'urgent' ? 'urgent' : ''}">
-            <strong>${notif.deviceName}</strong><br>
-            <small>${notif.message}</small><br>
-            <small>via ${notif.senderType} • ${notif.timestamp}</small>
-        </div>
-    `).join('');
-
-        console.log('✅ NOTIFICATIONS DISPLAY UPDATED');
+            <div class="notification-item ${notif.type === 'urgent' ? 'urgent' : ''}">
+                <strong>${notif.deviceName}</strong><br>
+                <small>${notif.message}</small><br>
+                <small>via ${notif.senderType} • ${notif.timestamp}</small>
+            </div>
+        `).join('');
     }
 
     logEvent(message) {
@@ -323,6 +337,71 @@ class WeatherSimulator {
         if (temp > 18) return "Mild ⛅";
         if (temp > 12) return "Cool 🌥️";
         return "Chilly 🌧️";
+    }
+
+    updateWeather(temperature, humidity, pressure, windSpeed, description) {
+        this.weatherData = {
+            temperature: temperature,
+            humidity: humidity,
+            pressure: pressure,
+            windSpeed: windSpeed,
+            description: description
+        };
+
+        this.updateWeatherDisplay();
+        this.notifyObservers();
+        this.logEvent(`🌤️ Weather updated: ${temperature}°C, ${windSpeed} km/h`);
+    }
+
+    switchCity(city) {
+        const cityData = {
+            almaty: { temp: 25, humidity: 65, pressure: 1010, wind: 15, desc: "Sunny in Almaty 🏔️" },
+            astana: { temp: 18, humidity: 70, pressure: 1015, wind: 25, desc: "Windy in Astana 🏛️" },
+            shymkent: { temp: 28, humidity: 55, pressure: 1008, wind: 10, desc: "Hot in Shymkent ☀️" },
+            aktobe: { temp: 20, humidity: 60, pressure: 1012, wind: 18, desc: "Clear in Aktobe 🌤️" },
+            karaganda: { temp: 16, humidity: 75, pressure: 1018, wind: 12, desc: "Cloudy in Karaganda ⛅" },
+            aktau: { temp: 22, humidity: 65, pressure: 1011, wind: 20, desc: "Breezy in Aktau 🌊" }
+        };
+
+        const data = cityData[city];
+        if (data) {
+            this.updateWeather(
+                data.temp,
+                data.humidity,
+                data.pressure,
+                data.wind,
+                data.desc
+            );
+            this.logEvent(`🏙️ Switched to ${city}`);
+
+            // Подсветка активного города
+            document.querySelectorAll('.city-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.city === city) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+    }
+
+    setWeatherScenario(scenario) {
+        const scenarios = {
+            heatwave: { temp: 35, humidity: 40, pressure: 1005, wind: 5, desc: "Heat wave! 🔥" },
+            storm: { temp: 15, humidity: 85, pressure: 980, wind: 35, desc: "Storm warning! ⚡" },
+            perfect: { temp: 22, humidity: 55, pressure: 1013, wind: 8, desc: "Perfect weather! 🌤️" },
+            cold: { temp: -5, humidity: 70, pressure: 1020, wind: 15, desc: "Freezing cold! ❄️" }
+        };
+
+        const scenarioData = scenarios[scenario];
+        if (scenarioData) {
+            this.updateWeather(
+                scenarioData.temp,
+                scenarioData.humidity,
+                scenarioData.pressure,
+                scenarioData.wind,
+                scenarioData.desc
+            );
+        }
     }
 }
 
