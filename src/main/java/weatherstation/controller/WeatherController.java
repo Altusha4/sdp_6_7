@@ -49,5 +49,4 @@ class ManualRequest {
     public double humidity;
     public double pressure;
     public double wind;
-    // Убираем desc - он больше не нужен
 }

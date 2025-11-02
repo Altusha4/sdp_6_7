@@ -5,9 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b058a5fb-fadc-4b01-b081-2161a30ecd0e" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/css/styles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/weatherstation/controller/WeatherController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/weatherstation/controller/WeatherController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/static/js/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/js/app.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/main/resources/static/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/main/resources/static/css/styles.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/main/resources/static/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/main/resources/static/index.html" afterDir="false" />
@@ -93,6 +93,15 @@
       <recent name="" />
     </key>
   </component>
+  <component name="RunManager">
+    <configuration name="WeatherApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="weather-notification-system" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="weatherstation.WeatherApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -108,7 +117,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1761972874278</updated>
-      <workItem from="1761972875734" duration="24456000" />
+      <workItem from="1761972875734" duration="33980000" />
     </task>
     <servers />
   </component>

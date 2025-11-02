@@ -16,12 +16,14 @@ class WeatherSimulator {
         this.eventLog = [];
         this.notifications = [];
         this.currentCarouselIndex = 0;
-        this.hoursPerView = 5; // Показываем по 5 часов за раз
+        this.hoursPerView = 5;
         this.hourlyData = [];
+        this.realTimeInterval = null;
+        this.isAutoUpdate = false;
+        this.weatherHistory = [20];
 
         this.initializeEventListeners();
         this.loadInitialWeather();
-        // Автоматически выбираем первый город
         setTimeout(() => this.switchCity('almaty'), 100);
     }
 
@@ -37,27 +39,21 @@ class WeatherSimulator {
     }
 
     initializeEventListeners() {
-        // Стратегии
         document.getElementById('realtime-btn').addEventListener('click', () => this.setRealTimeStrategy());
         document.getElementById('scheduled-btn').addEventListener('click', () => this.setScheduledStrategy());
         document.getElementById('manual-btn').addEventListener('click', () => this.setManualStrategy());
 
-        // Фабрики
         document.getElementById('mobile-factory').addEventListener('click', () => this.addMobileDevice());
         document.getElementById('web-factory').addEventListener('click', () => this.addWebDevice());
         document.getElementById('smarthome-factory').addEventListener('click', () => this.addSmartHome());
 
-        // Ручной ввод
         document.getElementById('update-manual').addEventListener('click', () => this.updateManualData());
 
-        // Bridge конфигурация
         document.getElementById('notification-type').addEventListener('change', () => this.updateBridgeConfig());
         document.getElementById('sender-type').addEventListener('change', () => this.updateBridgeConfig());
 
-        // Уведомления
         document.getElementById('send-notifications').addEventListener('click', () => this.notifyObservers());
 
-        // Города
         document.querySelectorAll('.city-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const city = e.target.dataset.city;
@@ -85,6 +81,122 @@ class WeatherSimulator {
         });
     }
 
+    startRealTimeUpdates() {
+        if (this.realTimeInterval) {
+            clearInterval(this.realTimeInterval);
+        }
+
+        this.isAutoUpdate = true;
+        this.realTimeInterval = setInterval(() => {
+            if (this.currentStrategy === 'realtime' && this.isAutoUpdate) {
+                this.generateRealTimeData();
+                this.updateWeatherDisplay();
+                this.logEvent('🔄 Auto-updated real-time data');
+
+                if (Math.random() > 0.8) {
+                    this.notifyObservers();
+                }
+            }
+        }, 8000);
+    }
+
+    stopRealTimeUpdates() {
+        this.isAutoUpdate = false;
+        if (this.realTimeInterval) {
+            clearInterval(this.realTimeInterval);
+            this.realTimeInterval = null;
+        }
+    }
+
+    generateRealTimeData() {
+        const lastTemp = this.weatherHistory[this.weatherHistory.length - 1];
+
+        const change = (Math.random() * 1 - 0.5);
+        const newTemp = lastTemp + change;
+
+        this.weatherData.temperature = Math.max(-10, Math.min(40, newTemp));
+
+        const currentHumidity = this.weatherData.humidity;
+        this.weatherData.humidity = Math.max(30, Math.min(90, currentHumidity + (Math.random() * 6 - 3)));
+
+        const currentPressure = this.weatherData.pressure;
+        this.weatherData.pressure = Math.max(990, Math.min(1030, currentPressure + (Math.random() * 4 - 2)));
+
+        const currentWind = this.weatherData.windSpeed;
+        this.weatherData.windSpeed = Math.max(0, Math.min(35, currentWind + (Math.random() * 2 - 1)));
+
+        this.weatherData.description = this.getWeatherDescription(this.weatherData.temperature);
+
+        this.weatherHistory.push(this.weatherData.temperature);
+        if (this.weatherHistory.length > 10) {
+            this.weatherHistory.shift();
+        }
+
+        this.updateHourlyForecastBasedOnCurrent();
+    }
+
+    updateHourlyForecastBasedOnCurrent() {
+        const currentTemp = this.weatherData.temperature;
+        const currentWind = this.weatherData.windSpeed;
+
+        const tempTrend = Math.random() > 0.5 ? 1 : -1;
+        const minTemp = Math.max(-15, currentTemp - 3 + tempTrend * 2);
+        const maxTemp = Math.min(45, currentTemp + 3 + tempTrend * 2);
+
+        const minWind = Math.max(0, currentWind - 3);
+        const maxWind = Math.min(50, currentWind + 5);
+
+        this.hourlyData = this.generateRealisticHourlyData(minTemp, maxTemp, minWind, maxWind, tempTrend);
+        this.updateCarousel();
+    }
+
+    generateRealisticHourlyData(minTemp, maxTemp, minWind, maxWind, tempTrend) {
+        const hours = [];
+        const currentHour = new Date().getHours();
+
+        for (let hourOffset = 0; hourOffset < 24; hourOffset++) {
+            const hour = (currentHour + hourOffset) % 24;
+            const time = `${hour.toString().padStart(2, '0')}:00`;
+
+            const timeOfDayFactor = this.getTimeOfDayFactor(hour);
+            const trendFactor = tempTrend * (hourOffset / 24);
+
+            const baseTemp = minTemp + (maxTemp - minTemp) * 0.5;
+            const temp = baseTemp + (timeOfDayFactor * 8) + (trendFactor * 4);
+
+            const wind = minWind + (maxWind - minWind) * (0.3 + 0.4 * Math.sin(hourOffset * Math.PI / 12));
+
+            hours.push({
+                time,
+                temperature: Math.round(temp * 10) / 10,
+                windSpeed: Math.round(wind * 10) / 10,
+                description: this.getRealisticHourDescription(temp, hour)
+            });
+        }
+        return hours;
+    }
+
+    getTimeOfDayFactor(hour) {
+        if (hour >= 6 && hour <= 12) return 0.8;
+        if (hour > 12 && hour <= 16) return 1.0;
+        if (hour > 16 && hour <= 20) return 0.6;
+        if (hour > 20 && hour <= 23) return 0.3;
+        return 0.1;
+    }
+
+    getRealisticHourDescription(temp, hour) {
+        const isDay = hour >= 6 && hour <= 20;
+
+        if (temp > 30) return isDay ? "🔥" : "🔥";
+        if (temp > 25) return isDay ? "☀️" : "🌙";
+        if (temp > 20) return isDay ? "🌤️" : "🌙";
+        if (temp > 15) return isDay ? "⛅" : "☁️";
+        if (temp > 10) return isDay ? "🌥️" : "☁️";
+        if (temp > 5) return isDay ? "🌧️" : "🌧️";
+        if (temp > 0) return isDay ? "❄️" : "❄️";
+        return "🧊";
+    }
+
     async setRealTimeStrategy() {
         try {
             const response = await fetch('/api/weather/strategy/realtime', { method: 'POST' });
@@ -92,12 +204,13 @@ class WeatherSimulator {
             this.weatherData = data;
             this.updateWeatherDisplay();
             this.setStrategy('realtime');
-            this.logEvent('🔄 Real-time data loaded from server');
+            this.updateHourlyForecastBasedOnCurrent();
+            this.logEvent('🔄 Real-time data loaded from server + AUTO-UPDATE');
         } catch (error) {
             this.generateRealTimeData();
             this.updateWeatherDisplay();
             this.setStrategy('realtime');
-            this.logEvent('🔄 Real-time data generated locally');
+            this.logEvent('🔄 Real-time data generated + AUTO-UPDATE ENABLED');
         }
     }
 
@@ -146,7 +259,13 @@ class WeatherSimulator {
             this.updateWeatherDisplay();
             this.logEvent(`✅ Manual data applied: ${temp}°C, ${humidity}%`);
         } catch (error) {
-            this.weatherData = { temperature: temp, humidity, pressure, windSpeed, description: "Manual Data" };
+            this.weatherData = {
+                temperature: temp,
+                humidity,
+                pressure,
+                windSpeed,
+                description: "Manual Data"
+            };
             this.updateWeatherDisplay();
             this.logEvent(`✅ Manual data applied locally: ${temp}°C, ${humidity}%`);
         }
@@ -172,12 +291,19 @@ class WeatherSimulator {
         this.currentStrategy = strategy;
         document.querySelectorAll('.strategy-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById(`${strategy}-btn`).classList.add('active');
-        this.logEvent(`🎯 Strategy: ${strategy}`);
 
-        if (strategy === 'manual') {
-            this.showManualInput();
+        if (strategy === 'realtime') {
+            this.startRealTimeUpdates();
+            this.logEvent('🎯 Real-time strategy: AUTO-UPDATE ENABLED');
         } else {
-            this.hideManualInput();
+            this.stopRealTimeUpdates();
+            if (strategy === 'manual') {
+                this.showManualInput();
+                this.logEvent('🎯 Manual strategy: enter custom data');
+            } else {
+                this.hideManualInput();
+                this.logEvent('🎯 Scheduled strategy: fixed forecast');
+            }
         }
     }
 
@@ -187,14 +313,6 @@ class WeatherSimulator {
 
     hideManualInput() {
         document.getElementById('manual-input-section').style.display = 'none';
-    }
-
-    generateRealTimeData() {
-        this.weatherData.temperature = 18 + (Math.random() * 15);
-        this.weatherData.humidity = 50 + (Math.random() * 40);
-        this.weatherData.pressure = 1005 + (Math.random() * 20);
-        this.weatherData.windSpeed = 2 + (Math.random() * 18);
-        this.weatherData.description = this.getWeatherDescription(this.weatherData.temperature);
     }
 
     generateScheduledData() {
@@ -227,6 +345,12 @@ class WeatherSimulator {
         else if (temp > 15) weatherIcon.textContent = '⛅';
         else if (temp > 5) weatherIcon.textContent = '🌧️';
         else weatherIcon.textContent = '❄️';
+
+        // Индикатор авто-обновления
+        const descElement = document.getElementById('description');
+        if (this.currentStrategy === 'realtime' && this.isAutoUpdate) {
+            descElement.innerHTML = `${this.weatherData.description} <span style="font-size:0.7em; color:#75b4e3;">(LIVE)</span>`;
+        }
     }
 
     addMobileDevice() {
@@ -373,36 +497,44 @@ class WeatherSimulator {
     switchCity(city) {
         const cityData = {
             almaty: {
-                temp: 25, humidity: 65, pressure: 1010, wind: 15, desc: "Sunny in Almaty",
-                hourly: this.generateHourlyData(18, 28, 5, 20)
+                temp: 22, humidity: 65, pressure: 1010, wind: 8, desc: "Pleasant in Almaty",
+                hourly: this.generateRealisticHourlyData(18, 26, 5, 15, 1)
             },
             astana: {
-                temp: 18, humidity: 70, pressure: 1015, wind: 25, desc: "Windy in Astana",
-                hourly: this.generateHourlyData(12, 20, 15, 30)
+                temp: 18, humidity: 70, pressure: 1015, wind: 12, desc: "Breezy in Astana",
+                hourly: this.generateRealisticHourlyData(14, 20, 8, 20, -1)
             },
             shymkent: {
-                temp: 28, humidity: 55, pressure: 1008, wind: 10, desc: "Hot in Shymkent",
-                hourly: this.generateHourlyData(22, 32, 3, 15)
+                temp: 26, humidity: 55, pressure: 1008, wind: 6, desc: "Warm in Shymkent",
+                hourly: this.generateRealisticHourlyData(22, 30, 3, 12, 1)
             },
             aktobe: {
-                temp: 20, humidity: 60, pressure: 1012, wind: 18, desc: "Clear in Aktobe",
-                hourly: this.generateHourlyData(15, 23, 10, 25)
+                temp: 20, humidity: 60, pressure: 1012, wind: 10, desc: "Clear in Aktobe",
+                hourly: this.generateRealisticHourlyData(16, 24, 6, 18, 0)
             },
             karaganda: {
-                temp: 16, humidity: 75, pressure: 1018, wind: 12, desc: "Cloudy in Karaganda",
-                hourly: this.generateHourlyData(12, 18, 8, 20)
+                temp: 16, humidity: 75, pressure: 1018, wind: 8, desc: "Cloudy in Karaganda",
+                hourly: this.generateRealisticHourlyData(12, 20, 5, 15, -1)
             },
             aktau: {
-                temp: 22, humidity: 65, pressure: 1011, wind: 20, desc: "Breezy in Aktau",
-                hourly: this.generateHourlyData(18, 25, 15, 25)
+                temp: 24, humidity: 65, pressure: 1011, wind: 15, desc: "Windy in Aktau",
+                hourly: this.generateRealisticHourlyData(20, 28, 10, 25, 1)
             }
         };
 
         const data = cityData[city];
         if (data) {
+            this.weatherHistory = [data.temp];
+
             this.updateWeather(data.temp, data.humidity, data.pressure, data.wind, data.desc);
-            this.hourlyData = data.hourly;
-            this.updateCarousel();
+
+            if (this.currentStrategy === 'realtime') {
+                this.updateHourlyForecastBasedOnCurrent();
+            } else {
+                this.hourlyData = data.hourly;
+                this.updateCarousel();
+            }
+
             this.logEvent(`🏙️ Switched to ${city}`);
 
             document.querySelectorAll('.city-btn').forEach(btn => {
@@ -461,7 +593,7 @@ class WeatherSimulator {
     updateCarouselPosition() {
         const track = document.querySelector('.carousel-track');
         if (track) {
-            const cardWidth = 92; // 80px + 12px gap
+            const cardWidth = 92;
             track.style.transform = `translateX(-${this.currentCarouselIndex * cardWidth}px)`;
         }
     }
@@ -473,9 +605,11 @@ class WeatherSimulator {
 
         if (prevBtn) {
             prevBtn.disabled = this.currentCarouselIndex === 0;
+            prevBtn.style.opacity = this.currentCarouselIndex === 0 ? '0.3' : '1';
         }
         if (nextBtn) {
             nextBtn.disabled = this.currentCarouselIndex >= maxIndex;
+            nextBtn.style.opacity = this.currentCarouselIndex >= maxIndex ? '0.3' : '1';
         }
     }
 
@@ -493,7 +627,6 @@ class WeatherSimulator {
         }
     }
 }
-
 document.addEventListener('DOMContentLoaded', () => {
-    new WeatherSimulator();
+    window.weatherApp = new WeatherSimulator();
 });

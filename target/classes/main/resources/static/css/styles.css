@@ -57,7 +57,6 @@ header p {
     box-shadow: 0 8px 32px rgba(0,0,0,0.2);
     border: 1px solid rgba(143, 224, 255, 0.1);
     transition: all 0.3s ease;
-    /* Убираем высоту auto и flex */
     height: fit-content;
 }
 
@@ -91,9 +90,7 @@ header p {
     font-weight: 500;
 }
 
-/* Weather Panel - делаем фиксированной ширины */
 .weather-panel {
-    /* Фиксируем ширину и убираем растягивание */
     width: 100%;
     max-width: 350px;
 }
@@ -204,7 +201,6 @@ header p {
     border-color: rgba(143, 224, 255, 0.5);
 }
 
-/* Weather Carousel */
 .weather-carousel {
     display: flex;
     align-items: center;
@@ -293,7 +289,6 @@ header p {
     cursor: not-allowed;
 }
 
-/* Manual Input */
 .manual-input {
     background: rgba(49, 37, 90, 0.4);
     padding: 12px;
@@ -332,9 +327,8 @@ header p {
     background: rgba(49, 37, 90, 0.9);
 }
 
-/* Control Panel Styles */
 .control-panel {
-    /* Центральная панель занимает оставшееся пространство */
+
 }
 
 .btn {
@@ -397,7 +391,6 @@ header p {
     background: rgba(49, 37, 90, 0.9);
 }
 
-/* Monitor Panel Styles */
 .monitor-panel {
     background: rgba(43, 35, 90, 0.4);
 }
@@ -468,7 +461,6 @@ header p {
     font-size: 0.85em;
 }
 
-/* Адаптивность */
 @media (max-width: 1200px) {
     .dashboard {
         grid-template-columns: 320px 1fr;
@@ -519,7 +511,6 @@ header p {
     }
 }
 
-/* Анимации */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -535,7 +526,6 @@ header p {
     animation: fadeInUp 0.5s ease-out;
 }
 
-/* Background Effects */
 body::before {
     content: '';
     position: fixed;
